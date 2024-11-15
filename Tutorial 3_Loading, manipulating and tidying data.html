@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Tutorial 3: Creating tidy data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/quarto.js"></script>
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/popper.min.js"></script>
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Tutorial 3_Loading, manipulating and tidying data_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Tutorial 3_Loading, manipulating and tidying data_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Tutorial 3_Loading, manipulating and tidying data_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Tutorial 3_Loading, manipulating and tidying data_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tutorial 3: Creating tidy data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="basic-data-exploration-and-visualisation-lecture-6" class="level2">
+<h2 class="anchored" data-anchor-id="basic-data-exploration-and-visualisation-lecture-6">Basic data exploration and visualisation (lecture 6)</h2>
+<p>This tutorial will cover the essential steps needed to import, clean and tidy data. Cleaning and tidying data is essential to get it from your field sheets and into R.</p>
+<p>In this tutorial, we again mostly use tidyverse tools, but we are going to build on the ones you have already used last week.</p>
+<section id="what-is-the-tidyverse" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-the-tidyverse">What is the tidyverse?</h3>
+<p>The tidyverse is built around core principles that aim to make data manipulation, analysis and visualisation in R easier, consistent and more intuitive. The philosophy centres around the <strong>Tidy Data</strong> concept:</p>
+<p>Each variable forms a column</p>
+<p>Each observation forms a row</p>
+<p>Each type of observational unit forms a table</p>
+<p>Functions within the tidyverse are all designed to work together, with the tidy data format so workflow becomes a lot easier. The tidyverse also uses “piping” , a method by which data is piped through different operations, with only the final output being saved. We saw a little bit of this at play in last weeks tutorial but this week we will dive deeper into the tidyverse and use a few different piping operations.</p>
+</section>
+<section id="preparing-data" class="level3">
+<h3 class="anchored" data-anchor-id="preparing-data">Preparing data:</h3>
+<p>It doesn’t matter if your data is in wide or long format. Although wide may easiest when working in the field, long may be best for some analyses. However, conversion can be done in R. Just ensure that data is collected into a spreadsheet app with different columns for the variables of interest and rows for the observations.</p>
+<p>We are going to use a dataset accessed from eMammal - an online repository of a large number of different mammal based datasets. Last week we used a dummy dataset - this week its real!</p>
+<p>The dataset used here is from the canid collision project in Panama (link to raw data:<a href="https://emammal.si.edu/projects/canid-collision-project" class="uri">https://emammal.si.edu/projects/canid-collision-project</a>), a camera trap survey of canids and other mammals in agricultural areas of Panama. The data consists of identified camera trap images at different locations in Panama alongside additional data on whether or not camera traps were baited, GPS locations of camera traps and some details about the habitat in which camera traps were placed. We can use this data to ask a number of questions such as the count of different species by camera trap, by feature type or whether baiting a camera trap increases the presence of certain species. In this tutorial we will transform the raw data into a usuable form using tidy approaches, look for any issues and again carry out some exploratory statistics.</p>
+</section>
+<section id="outline-of-the-tutorial" class="level3">
+<h3 class="anchored" data-anchor-id="outline-of-the-tutorial">Outline of the tutorial:</h3>
+<ul>
+<li><p>Reading in and manipulating a dataframe into a usuable format (building on last week)</p></li>
+<li><p>Calculating summary statistics</p></li>
+<li><p>Transforming data</p></li>
+<li><p>Visualising data</p></li>
+</ul>
+</section>
+<section id="reading-in-and-manipulating-the-dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="reading-in-and-manipulating-the-dataframe">Reading in and manipulating the dataframe</h3>
+<p>First, lets read in our example dataset of this week and do a first inspection.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Rmisc) <span class="co">#load this before loading tidyverse</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("vegan") - if you have not installed vegan, remove the comment and install the package!</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("moments")- if you have not installed vegan, remove the comment and install the package!</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(moments)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Good practice when starting R to clear everything</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#read in the data</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#check head and tail</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#check the structure of the dataset</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#remove any duplicate rows</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#remove any records that are not of interest</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#create a new dataset that is a count for each species at each location</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>canid_col<span class="ot">&lt;-</span><span class="fu">read_csv</span>(<span class="st">"Canid_collision.csv"</span>) </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(canid_col)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(canid_col)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(canid_col) <span class="co">#do the column types look like what we expect?</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(canid_col) <span class="co">#There are NAs in lat and long - so there is at least one site without location information</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(canid_col) <span class="co">#what does this tell us?</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(canid_col) <span class="co">#what does this do?</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(canid_col<span class="sc">$</span>bait_type) <span class="co">#creates a frequency table of how many mentions of each unique value in the selected column. </span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(canid_col<span class="sc">$</span>species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Exercise 1:</p>
+<p>Using the test dataset, what can you already say about the data?</p>
+<ul>
+<li><p>Are there missing values? (look for columns with NAs)</p></li>
+<li><p>How many rows or columns are there?</p></li>
+<li><p>Are the column types as you expect?</p></li>
+<li><p>Are there any differences in sizes of different factors?</p></li>
+</ul>
+<p>Lets look more closely at what the dataset consists of.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(canid_col) <span class="co">#what are all the different columns called</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(canid_col<span class="sc">$</span>start_time) <span class="co">#check that this is actually formatted as a date/time</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(canid_col<span class="sc">$</span>common_name) <span class="co">#lets see all the different species trapped - this is a good way to check that there are no spelling errors that mean a single species has more than one name</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(canid_col<span class="sc">$</span>group_size) <span class="co"># lets look at how variable the group sizes are</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(canid_col<span class="sc">$</span>sub_project_name)) <span class="co">#how many different areas did they place camera traps in? Here, unique pulls out all the unique sub_project_name values, and length returns how long the vector is containing all the names, hence the numner of unique sub_project_names</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(canid_col<span class="sc">$</span>start_time) <span class="co">#these are the times the camera trap pictures were taken but they are far too specific. Lets extract some meaningful values. We will use the lubridate package for this</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The canid collision dataset contains a very precise start time based on when the camera went off - this will be too precise for our needs. What if we want to summarise data by the day or the month? We need to create some new columns which extract these time variables from the start time variable.</p>
+<p>We are going to</p>
+<ul>
+<li>add four new columns to our dataset that extract the Month, Day, Hour and Date from the start date variable using <strong>mutate</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>canid_col<span class="sc">%&gt;%</span><span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">month</span>(<span class="fu">ymd_hms</span>(start_time)), <span class="at">Day =</span> <span class="fu">day</span>(<span class="fu">ymd_hms</span>(start_time)), <span class="at">Hour =</span> <span class="fu">hour</span>(<span class="fu">ymd_hms</span>(start_time)), <span class="at">Date =</span> <span class="fu">as_date</span>(<span class="fu">ymd_hms</span>(start_time)))<span class="ot">-&gt;</span>canid_col </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#the above code makes new columns with the month, day, hour and date as extracted from the start time column </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Exercise 2:</p>
+<p>See if you can answer the below additional questions (comment the code to include both an explanation of what the code is doing and an answer):</p>
+<ul>
+<li><p>How many different species were detected? (hint - use the same approach as in the previous code block to count the number of sub_project_areas)</p></li>
+<li><p>How many camera traps were baited vs non baited?</p></li>
+<li><p>Can you summarise the dataset - what each column is, the kind of data in it (is it continuous, discrete, factor etc..)</p></li>
+</ul>
+<p>The raw dataset consists of single camera trap records with the number of animals per triggered event recorded in the variable “group size” but it would be good to <strong>group</strong> and <strong>summarise</strong> these into species records by camera trap locations. This will take some reshaping of the dataset. This way we can have a count of the number of each species detected at each location. This would allow us to plot site level variables against the count of each species for example.</p>
+<p>In its current format, this is “presence only data”, that is the camera trap did not record absences in this dataset. However, if we assume that all the species caught on camera were equally likely to be trapped at all our sites, then we need to do some data manipulation to have a full dataset of camera trap locations along with all the possible species that could have been captured.</p>
+<p>TThe data is already in “long” form, but as part of ensuring that every species is counted at every site (whether present or not), we will need to take the following steps:</p>
+<ul>
+<li><p>Extract the day - month and month in which the camera trap picture was taken and use that as “month” variable</p></li>
+<li><p><strong>Group by</strong> the data we want to keep unique. At this point it is all the data pertaining to the site information so we want site level information to be maintained when we group.</p></li>
+<li><p><strong>Summarise</strong> based on the <strong>count</strong> of the group size variable to get a record of how many animals of each species were recorded at that camera trap point.</p></li>
+<li><p><strong>pivot_wider</strong> so that we can have a record of all species at all camera trap points, with 0 added for species that were not present at a given camera trap point (moving from a long to wide dataformat)</p></li>
+<li><p><strong>pivot_longer</strong> so that we gather the data back into long format with a species record at each site and a count of each species at each site.</p></li>
+</ul>
+</section>
+<section id="converting-data-between-wide-and-long-formats" class="level3">
+<h3 class="anchored" data-anchor-id="converting-data-between-wide-and-long-formats">Converting data between wide and long formats</h3>
+<p>Converting data between wide and long formats means reshaping the dataset in certain specific ways. Going from wide to long would mean gathering the data using some kind of common feature so you have a single variable for a given category. For example, say in the canid collisions dataset we only know which species were caught by each camera trap, we do not have a record of which species were <strong>not</strong> captured. Therefore, the “wide” data format that has a separate column for each camera trap station is useful as we can fill in the camera traps which did not capture a given species with a 0. Alternatively, say we had a separate column for each species trapped at each camera trap site. This may be problematic for downstream data analysis so we would want to gather that into long format with two new columns, one which contains each species ID and another which contains the counts of those species. Moving between these different data types is an important part of data manipulation.</p>
+<p>We are going to do this using <strong>piping</strong> in the tidyverse syntax. This symbol: %&gt;% is the <strong>pipe operator</strong>. It allows you to chain together multiple operations in a clear, readable way. For small steps, indexing and base R approaches may be preferable, but for many steps, piping becomes much clearer</p>
+<p>This is especially the case when you want to carry out multiple data handling steps without continuously needing to save to objects. Therefore piping maintains an easy to follow and uncluttered work space.</p>
+<p>Go through the below code and add comments at each point that matches with the bullet point list above. Note, with piping you can run each section by itself and see the outcome before running the full chain.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>canid_col<span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deployment_id, actual_lat, actual_long, retrieval_date, sub_project_name, plot_name, bait_type, feature, common_name)<span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">sum</span>(group_size))<span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> common_name, <span class="at">values_from =</span> Count, <span class="at">values_fill =</span> <span class="dv">0</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">9</span><span class="sc">:</span><span class="dv">46</span>, <span class="at">names_to =</span> <span class="st">"common_name"</span>, <span class="at">values_to =</span> <span class="st">"Count"</span>)<span class="ot">-&gt;</span>canid_dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This has given us a dataset of different species by site. If we wanted to understand species specific relationships with our variables we could continue with this dataset.</p>
+<p>But what if we are not interested in the specific species, but we just want to know the diversity of each site? Lets see if we can extract the species richness and shannon diversity for each site.</p>
+<p>In the below code we are going to do the following steps:</p>
+<ul>
+<li><p>Take our data object we created in the last step</p></li>
+<li><p><strong>filter</strong> to remove all the records with none of that species present</p></li>
+<li><p><strong>group_by</strong> the columns of interest that we want to keep. Here we use the additional function, <strong>across</strong>, to select the columns we want to include without having to type out all their names. Instead we use their position</p></li>
+<li><p><strong>summarise</strong> by the length of the unique common names as this gives us a count of how many different species were recorded in each area.</p></li>
+<li><p>output to a new object, canid_SR.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>canid_dat<span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Count <span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">SR =</span> <span class="fu">length</span>(<span class="fu">unique</span>(common_name)))<span class="ot">-&gt;</span>canid_SR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Is species richness the best variable to use? We can also consider Shannon Index which weights by abundance, and therefore takes into account whether a species is rare or not.</p>
+<p>In order to calculate shannon index, we can use the vegan package. This takes a site by species abundance matrix as its input. Therefore, we need to modify our dataset again into wide format (recall that in this format, each row is a site and columns are then counts of the different specis), and then calculate the shannon index for each site using the diversity function. We will do the following steps:</p>
+<ul>
+<li><p>Reshape the original dataset into the site by species abundance matrix using <strong>group_by</strong>, <strong>summarise</strong> and <strong>pivot_wider</strong></p></li>
+<li><p>Calculate the shannon diversity using <strong>diversity</strong> and specifying the index of interest within the dplyr chain using the <strong>mutate</strong> function. Note we also use the <strong>c_across(where(is.numeric)))</strong> chain of functions which says calculate across all the columns where the condition is.numeric() is true. This is a short hand way of ignoring the site specific variables.</p></li>
+<li><p>Selecting the site ID and the newly created SH column using <strong>select</strong> and merging this with the canid_SR dataset we made previously using a <strong>join</strong> function (note <strong>merge</strong> would also work here, see below).</p></li>
+<li><p>Shifting the SH column to the end using the <strong>select</strong> function</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>canid_col<span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deployment_id, retrieval_date, common_name)<span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">sum</span>(group_size))<span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> common_name, <span class="at">values_from =</span> Count, <span class="at">values_fill =</span> <span class="dv">0</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">SH =</span> <span class="fu">diversity</span>(<span class="fu">c_across</span>(<span class="fu">where</span>(is.numeric)), <span class="at">index =</span> <span class="st">"shannon"</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(deployment_id, retrieval_date, SH)<span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(canid_SR)<span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>SH, <span class="fu">everything</span>(), SH)<span class="ot">-&gt;</span>canid_SR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Add comments to the above code matching steps to the actual points in the code.</p>
+<p>We already gave a small example above, but lets say we have another dataset with additional information about each camera trapping site. We can add this to our original dataset using the <strong>merge</strong> function (base function compared to left_join / right_join). Here, we are going to pretend that we also have information on the distance to the nearest major city for each camera trap point.This is stored in the DistToCity.csv file. In the below code we will follow these steps:</p>
+<ul>
+<li><p>Read in the new file using <strong>read_csv</strong></p></li>
+<li><p>Check that datafile before we merge it</p></li>
+<li><p><strong>merge</strong> the two files together</p></li>
+</ul>
+<p>This works best when you have a common variable to merge on. If you want to merge without a common variable you will need to define which variables are the shared key on which you want to merge (see the help files in merge for more details). This can get pretty complicated so I would advise making sure you have a common variable before you want to merge.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>DistToCity<span class="ot">&lt;-</span><span class="fu">read_csv</span>(<span class="st">"DistToCity.csv"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(DistToCity) <span class="co">#there is an extra column that we aren't expecting so lets remove it before we go any further</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>DistToCity[,<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>]<span class="ot">-&gt;</span>DistToCity</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DistToCity) <span class="co"># this now looks correct</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(DistToCity)<span class="ot">-&gt;</span>canid_SR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The final step we are oging to do here is to rename one of the headers to make it more meaningful. In our dataset the deployment ID is a long way of saying Site ID, and the header, plot_name, refers to the habitat in which the camera trap was set (is it a large forest, a small forest or open). Lets change this to something more meaningful. Change deployment_id to SiteID and plot_name to Habitat</p>
+<p>There are two ways in which we can do this. I am going to show you both methods.</p>
+<ul>
+<li><p>Tidyverse / dplyr approach uses <strong>rename</strong></p>
+<ul>
+<li><strong>rename(new_name = old_name)</strong></li>
+</ul></li>
+<li><p>Base R version uses <strong>names</strong> and subsetting</p>
+<ul>
+<li><p>First use the <strong>names()</strong> command to identify the position of the column you want to rename</p></li>
+<li><p>Then index using <strong>[]</strong> and the column position and update with the new name (see tutorial 2)</p></li>
+</ul></li>
+</ul>
+<p>EXERCISE 4:</p>
+<p>Use both approaches, one to rename deployment ID to SiteID and the other to change plot_name to Habitat</p>
+<p>This completes the data manipulation part of the tutorial.</p>
+</section>
+<section id="generating-and-interpreting-descriptive-statistics" class="level3">
+<h3 class="anchored" data-anchor-id="generating-and-interpreting-descriptive-statistics">Generating and interpreting descriptive statistics</h3>
+<p>Remember from last week, our summary statistics help us understand our dataset better before we start our analysis.</p>
+<p>First, lets define our dependent / response variable. This is the variable of interest, what you want to analyse. In this example, we are going to analyse site specific species richness and site specific shannon diversity as our response variable. However, you could also look at things like the individual species counts.</p>
+<p>Independent / explanatory variables are those which you think may affect your dependent variables. They may also be confounders. In this case, they can be</p>
+<ul>
+<li><p>Bait type</p></li>
+<li><p>feature</p></li>
+<li><p>Habitat</p></li>
+<li><p>distance to the nearest city (remember this is a made up variable!)</p></li>
+</ul>
+<p>In our example we are going to look at Habitat (which is a measure of habitat type, remember this was called plot_name before we did the name change in the previous steps) and distance to the nearest city as our explanatory variables.</p>
+</section>
+<section id="calculating-summary-statistics" class="level3">
+<h3 class="anchored" data-anchor-id="calculating-summary-statistics">Calculating summary statistics</h3>
+<p>Before we start plotting, we can calculate some summary statistics. For example, the mean, median, mode, variance and IQR (interquartile range) of the two response variables. We will use the following functions:</p>
+<ul>
+<li><p><strong>table()</strong> - gives a frequency table, useful for summarising count data</p></li>
+<li><p><strong>summary()</strong> - summarises your dataframe, with min, mean and quantile information for numeric columns</p></li>
+<li><p><strong>quantile()</strong> - gives the quantiles, with the opportunity to set your own quantiles</p></li>
+<li><p><strong>sd()</strong> - gives the standard deviation</p></li>
+<li><p><strong>var()</strong> - gives the variance</p></li>
+<li><p>using group_by and summarise allows you to calculate within group summaries. In the example I will use the mean but you can experiment to add more summary statistics such as the standard deviation or the variance</p>
+<p>EXERCISE:</p>
+<ul>
+<li><p>Use the above functions to calculate summary statistics around the species richness in the dataset. I have started with the quantile function.</p></li>
+<li><p>Chain some commands together to calculate the mean, standard deviation, standard error and variance for this dataset (see last weeks tutorial for hints and build on the example chain provided below)</p></li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(canid_SR<span class="sc">$</span>SR, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 2.5% 97.5% 
+ 1.00  8.15 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span><span class="fu">group_by</span>(Habitat)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">MeanSR =</span> <span class="fu">mean</span>(SR), <span class="at">meanSH =</span> <span class="fu">mean</span>(SH))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  Habitat      MeanSR meanSH
+  &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;
+1 Large Forest   4.2   0.810
+2 Open           3.67  0.635
+3 Small Forest   4.29  0.849</code></pre>
+</div>
+</div>
+<p>From looking at the above output, which statement below is TRUE? (look at the lecture in week 3 for a hint)</p>
+<ul>
+<li><p>The mean and standard deviation suggest that there is a large difference between habitat types</p></li>
+<li><p>The mean and standard deviation suggest that there is little difference between habitat types.</p></li>
+</ul>
+<p>Can you adjust the above code to also include the variance?</p>
+<p>This is R, so there is a package to do this!</p>
+<p>The library, Rmisc, gives an easy way to calculate summary statistics that can easily integrate with the package we will use for visualising, so lets try summarising using Rmisc. This package <strong>must be loaded before tidyverse</strong> otherwise it causes conflicts!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>?summarySE</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>canid_summary<span class="ot">&lt;-</span><span class="fu">summarySE</span>(canid_SR, <span class="at">measurevar =</span> <span class="st">"SR"</span>, <span class="at">groupvars =</span> <span class="st">"Habitat"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>canid_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>What happens if you include two group_vars by using groupvars - c(“Habitat”, “bait_type”)?</li>
+</ul>
+<section id="visualising-the-data" class="level4">
+<h4 class="anchored" data-anchor-id="visualising-the-data">Visualising the data</h4>
+<p>Visualising data is an important step for a number of reasons. First, human brains are often better at finding patterns or detecting unusual patterns in visual objects, so plotting data allows you to visually assess your data. Secondly, by plotting your data, you are trying to convey a message about the data. This is not so important at the data exploration stage, but we will cover this in detail in later tutorials, and once we are trying to convey a message and produce beautiful, publication ready plots, the tidyverse and ggplot package are much easier to use than base R for plotting. Hence we will already start with a ggplot approach.</p>
+<p>Here is a link to a free “cookbook” with lots of recipes on making beautiful plots: <a href="https://r-graphics.org/" class="uri">https://r-graphics.org/</a></p>
+<p>Some notes on plotting.</p>
+<ul>
+<li><p>If you want to plot data distributions, you either want to use a histogram or a density plot (i.e.&nbsp;<strong>geom_histogram</strong>() or <strong>geom_density</strong>())</p></li>
+<li><p>If your data are count data of categories, a bar plot would be appropriate (<strong>geom_bar</strong>())</p></li>
+<li><p>If your data are two numeric / continuous variables, use a scatter plot <strong>(geom_point(</strong>) or <strong>geom_jitter</strong>)</p></li>
+<li><p>If you want to express summary statistics in graphical form for different groups of numeric data, use a boxplot or a violin plot (e.g.&nbsp;<strong>geom_boxplot</strong>() or <strong>geom_violin</strong>())</p></li>
+<li><p>If you want to show a heat map or show the strength of a relationship between two variables you can use a tiled approach (<strong>geom_tile</strong>()) - this one works well for spatial or datetime data.</p></li>
+<li><p>If you are interested in changes over time, a line plot may be more useful (e.g.&nbsp;<strong>geom_line()</strong>)</p></li>
+</ul>
+</section>
+<section id="ggplot-syntax" class="level4">
+<h4 class="anchored" data-anchor-id="ggplot-syntax">ggplot syntax</h4>
+<p>ggplot uses its own syntax which is a bit confusing when you first start. Its also highly flexible so you will see different examples online.</p>
+<p>Below demonstrates how we build up a ggplot call. Run the below code in sequence and check the output in the “plots” pane</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR, <span class="fu">aes</span>(Habitat, SR)) <span class="co">#this calls the base layer and tells ggplot that you will plot habitat against species richness. However, we haven't specified the data that we will use!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR, <span class="fu">aes</span>(Habitat, SR))<span class="sc">+</span><span class="fu">geom_point</span>() <span class="co">#now we have told R that we want to plot the data as points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(Habitat, SR)) <span class="co">#this produces the same result. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span><span class="fu">ggplot</span>()<span class="sc">+</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(Habitat, SR)) <span class="co">#and you can also use ggplot in dplyr chains like this.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="fu">aes</span>(Habitat, SR, <span class="at">fill =</span> bait_type), <span class="at">stat =</span> <span class="st">"identity"</span>) <span class="co">#if you put fill (or col) inside the aes() call, it colours by the category you have defined. Here I used feature to look at the species richness broken down by bait type. A function call outside of aes applies to the geom_bar function call, here when using geom_bar you need to specify whether you are using stat = "identity" or stat = "count"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>canid_summary<span class="sc">%&gt;%</span><span class="fu">ggplot</span>()<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="fu">aes</span>(Habitat, SR), <span class="at">stat =</span> <span class="st">"identity"</span>) <span class="co">#using our summary from Rmisc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>canid_summary<span class="sc">%&gt;%</span><span class="fu">ggplot</span>(<span class="fu">aes</span>(Habitat, SR))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>)<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR<span class="sc">-</span>se, <span class="at">ymax =</span> SR<span class="sc">+</span>se), <span class="at">width =</span> <span class="fl">0.5</span>) <span class="co">#you can also chain commands in ggplot to build up the plot - here we have added errorbars.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-11-7.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="saving-or-copying-ggplots" class="level4">
+<h4 class="anchored" data-anchor-id="saving-or-copying-ggplots">Saving or copying ggplots</h4>
+<p>A key benefit of ggplot is that it easily produces publication ready plots that are a certain resolution, size and format. In order to extract your plots from RStudio you can do the following</p>
+<ul>
+<li>Right click on the plot, click copy and then in your word doc / powerpoint presentation right click and save (doesn’t always work with keyboard shortcuts)</li>
+</ul>
+<p>You can also specify how your plots look, for example setting a particular colour scheme</p>
+<ul>
+<li><p>use fill = “” or col = “” outside the aes call, to specify the colour you would like to use</p></li>
+<li><p>use themes to create a nicer plot. Some themes are clearer than others to view. Some examples below.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_dat)<span class="sc">+</span><span class="fu">geom_histogram</span>(<span class="fu">aes</span>(Count), <span class="at">binwidth =</span> <span class="dv">5</span>) <span class="co"># distribuition of the count data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_histogram</span>(<span class="fu">aes</span>(SR), <span class="at">fill =</span><span class="st">"coral"</span>)<span class="sc">+</span><span class="fu">theme_minimal</span>() <span class="co"># distribution of the species richness data and we have selected a nicer colour</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-12-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_histogram</span>(<span class="fu">aes</span>(SH), <span class="at">fill =</span> <span class="st">"violet"</span>)<span class="sc">+</span><span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-12-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="using-ggplot" class="level4">
+<h4 class="anchored" data-anchor-id="using-ggplot">Using ggplot</h4>
+<p>ggplot is a very flexible plotting approach that can help you make beautiful plots. As we go through, I will include different commands that “beautify” the plot for you. In this case I call theme_minimal() because it makes a much more attractive plot than the default plot. You can see this comparing the first plot to the second and third. there are lots of different themes that you can explore (in the last example I use theme_classic() for example). Later tutorials will provide more detail on how to prettify plots.</p>
+<p>Looking at the distribution tells us that:</p>
+<ol type="1">
+<li>we have a lot of sites where there are very low counts of certain species</li>
+<li>we have sites where there are a lot of zeroes</li>
+<li>we have some sites with very high counts of certain species</li>
+<li>we have a fairly good spread of species richness data.</li>
+<li>we have a fairly good spread of shannon data index that has quite lot of zeros but approximates a normal distribution.</li>
+</ol>
+<p>We can also plot density histograms to investigate the spread of the data - for example, how were the camera traps distributed across different habitats? Was it fairly even or not?</p>
+<p>EXERCISE 5</p>
+<ul>
+<li><p>We use <strong>geom_density</strong> here, with the command <strong>alpha</strong>. See if you can replicate this from last weeks tutorial</p></li>
+<li><p>Adjust alpha. What does it control?</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Notice here that I have included axis labels this time, and by including fill inside the aes() function call, we now have a plot that displays the three different habitat categories were were interested in.</p>
+<ul>
+<li>How would you interpret this plot? What does this tell you about the data?</li>
+</ul>
+<p>As a final exercise, lets plot our distributions for the three different habitat types so we can compare them alongside eachother. This is just another way of visualising the data.</p>
+<ul>
+<li>Edit this code to add a theme of your choice.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR, <span class="fu">aes</span>(<span class="at">x =</span> SR))<span class="sc">+</span><span class="fu">geom_density</span>()<span class="sc">+</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>Habitat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>What about skewness and kurtosis in our dataset?</p>
+<p>Recall: Skew is a measure of how assymetrical the distribution is. Kurtosis is a measure of whether a distribution is heavy or light tailed relative to a normal distribution</p>
+<p>We can use the <strong>moments</strong> package to easily calculate these measures:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skewness</span>(canid_SR<span class="sc">$</span>SR) <span class="co">#positive skewness suggests a right skewed data set which is not unusual for count data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4901753</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kurtosis</span>(canid_SR<span class="sc">$</span>SR) <span class="co"># a kurtosis value of 3 suggests no kurtosis, so our dataset doesnt exhibit a lot of kurtosis.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.638537</code></pre>
+</div>
+</div>
+<ul>
+<li>Add to the code above to calculate the skewness and kurtosis for shannon index.</li>
+</ul>
+<p>As a rule of thumb:</p>
+<ul>
+<li><p>Skewedness:</p>
+<ul>
+<li><p>between -0.5 and 0.5 - data fairly symmetrical</p></li>
+<li><p>between -1 - -0.5 and 0.5 - 1, moderately skewed</p></li>
+<li><p>less than -1 or more than 1, highly skewed</p></li>
+</ul></li>
+<li><p>Kurtosis:</p>
+<ul>
+<li><p>Close to 3- normal distribution assumed</p></li>
+<li><p>less than 3 - light tails</p></li>
+<li><p>greater than 3 = heavy tails</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="plotting-the-hypothesis" class="level4">
+<h4 class="anchored" data-anchor-id="plotting-the-hypothesis">Plotting the hypothesis</h4>
+<p>So far, nothing suggests that we have anything to worry about. Next, we want to start plotting our data in more detail, beginning with the hypotheses (recall that the left hand side of the ~ is the response variable, the right hand side is the explanatory variable)</p>
+<ol type="1">
+<li>Species richness ~ habitat</li>
+<li>shannon index ~ habitat</li>
+<li>Species richness ~ distance to city</li>
+<li>Shannon index ~ distance to city</li>
+</ol>
+<p>In the below code, edit it to format the theme as you choose.</p>
+<p>First, we will look at the raw data for species richness and shannon index vs the different habitat types. I have provided the code for species richness. Add to it to include plots for shannon index</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(Habitat, SR)) <span class="co">#this plot is meaningless - compare with geom_jitter below</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_jitter</span>(<span class="fu">aes</span>(Habitat, SR), <span class="at">width =</span> <span class="fl">0.2</span>)<span class="co">#adjusting the width changes the jitter - play around with this to see the change in the plot output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>What does this tell us about the data distribution and how the data were collected?</li>
+</ul>
+</section>
+<section id="using-boxplots-and-violin-plots" class="level4">
+<h4 class="anchored" data-anchor-id="using-boxplots-and-violin-plots">Using boxplots and violin plots</h4>
+<p>Another way of presenting the distribution of your dataset is though the use of boxplots or violin plots. These are clearer than just plotting the raw data above, as they provide additional information.</p>
+<p>Boxplots:</p>
+<ul>
+<li><p>Summarise the distribution of a dataset based on a 5 number summary</p>
+<ul>
+<li><p>Whiskers extend to the minimum and maximum values wihtin 1.5* the interquartile range. Therefore they give an idea of the range of the data</p></li>
+<li><p>Points show outliers that are beyond the range covered by the whiskers</p></li>
+<li><p>The boundaries of the box are the interquartile range. The thick line in the middle of the box is the median, the upper and lower boundaries of the box are the third and first quartiles and the length is therefore the IQR</p></li>
+</ul></li>
+<li><p>Provide a quick, clean summary of the data</p></li>
+</ul>
+<p>Violin plots</p>
+<ul>
+<li><p>Show the full distribution of the data and whether there could be multimodality (what does this mean?)</p></li>
+<li><p>Can include boxplots inside (code given below)</p></li>
+<li><p>Do not explicitly highlight outliers (compare below where the outlier in the boxplot for the open plots is clearly highlighted but in the violin plot is encapsulated within the shape of the violin).</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(Habitat, SR))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_violin</span>(<span class="fu">aes</span>(Habitat, SR), <span class="at">trim =</span> <span class="cn">FALSE</span>, <span class="at">fill =</span> <span class="st">"lightblue"</span>)<span class="sc">+</span><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(Habitat, SR), <span class="at">width =</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Looking at these plots, does anything jump out?</p>
+<ul>
+<li>There is an outlier in the open habitat. It suggests that in one of the sites there was an unusually high species richness.</li>
+</ul>
+<p>We can investigate this further by <strong>filtering</strong> out the record of interest and looking at the species that were present in our original species specific dataset</p>
+<ul>
+<li><p>First we <strong>filter</strong> on site ids with a SR of 10</p></li>
+<li><p>Extract the site ID and save it in a new object</p></li>
+<li><p>Use that to look at the raw data</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(SR <span class="sc">==</span> <span class="dv">10</span>) <span class="co">#lets filter and take a look</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">$</span>SiteID[canid_SR<span class="sc">$</span>SR <span class="sc">==</span> <span class="dv">10</span>]<span class="ot">-&gt;</span>check_SR <span class="co">#extract the deployment ID</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>canid_dat<span class="sc">$</span>common_name[canid_dat<span class="sc">$</span>deployment_id <span class="sc">==</span> check_SR <span class="sc">&amp;</span> canid_dat<span class="sc">$</span>Count<span class="sc">&gt;</span><span class="dv">0</span>] <span class="co">#check the raw data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Did you notice anything unusual about all the species present here?</p>
+<p>They are mostly domestic! Do domestic animals contribute to species richness? We should update our dataset to also include the species richness and shannon index of non domestic animals.</p>
+<p>To do this we will:</p>
+<ul>
+<li><p><strong>Filter</strong> out the domestic animal values using <strong>str_detect</strong> which detects character strings</p></li>
+<li><p><strong>group, summarise and pivot</strong> as before</p></li>
+<li><p><strong>join</strong> the new data to the original dataset</p></li>
+<li><p><strong>mutate</strong> the data to make sure sites with only domestic animals are recorded as zero</p></li>
+<li><p>reorder the columns using <strong>select</strong></p></li>
+<li><p>I will do this for species richness, edit the code to do the same steps for Shannon Index, and comment in the code explaining what each line does (EXERCISE 6)</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#SR</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>canid_col<span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(common_name, <span class="fu">regex</span>(<span class="st">"domestic"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)))<span class="sc">%&gt;%</span> <span class="co"># filter out any records with domestic in the name</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deployment_id)<span class="sc">%&gt;%</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">SR_ND =</span> <span class="fu">length</span>(<span class="fu">unique</span>(common_name)))<span class="sc">%&gt;%</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">SiteID =</span> deployment_id)<span class="sc">%&gt;%</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">right_join</span>(canid_SR)<span class="sc">%&gt;%</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">SR_ND =</span> <span class="fu">replace_na</span>(SR_ND,<span class="dv">0</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>SR_ND, <span class="fu">everything</span>(), SR_ND)<span class="ot">-&gt;</span>canid_SR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Redo the summary statistics you ran previously but this time on the non domestic species richness and shannon index</p>
+<ul>
+<li><p>First make a summary of the mean, standard deviation and variance for species richness with and without domestic animals</p>
+<ul>
+<li>Break this down by habitat type</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Summary Statistics for Species Richness by Habitat"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 7
+  Habitat      MeanSR MeanSR_ND SD_SR SD_SR_ND Var_SR Var_SR_ND
+  &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+1 Large Forest   4.2       3.45  2.40     2.44   5.75      5.94
+2 Open           3.67      1.47  2.18     1.55   4.73      2.39
+3 Small Forest   4.29      2.89  1.99     2.05   3.97      4.22</code></pre>
+</div>
+</div>
+<ul>
+<li><p>make a summary of the mean, standard deviation and variance for shannon index with and without domestic animals</p>
+<ul>
+<li>Break this down by habitat type.</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Summary Statistics for Shannon Index by Habitat"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 7
+  Habitat      MeanSH MeanSH_ND SD_SH SD_SH_ND Var_SH Var_SH_ND
+  &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+1 Large Forest  0.810     0.789 0.504    0.488  0.254     0.238
+2 Open          0.635     0.307 0.481    0.440  0.232     0.194
+3 Small Forest  0.849     0.722 0.539    0.565  0.290     0.319</code></pre>
+</div>
+</div>
+<p>You can also use the summarySE approach to get a measure of the mean and confidence intervals alongside the standard error; this will result in the below output:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>       Habitat  N    SR_ND       sd        se        ci
+1 Large Forest 20 3.450000 2.438183 0.5451943 1.1411048
+2         Open 60 1.466667 1.545542 0.1995286 0.3992559
+3 Small Forest 35 2.885714 2.054714 0.3473100 0.7058189</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Habitat  N     SH_ND        sd         se        ci
+1 Large Forest 20 0.7893822 0.4876414 0.10903993 0.2282232
+2         Open 60 0.3074427 0.4399990 0.05680362 0.1136638
+3 Small Forest 35 0.7220145 0.5649235 0.09548951 0.1940580</code></pre>
+</div>
+</div>
+<p>Has removing domestic animals made a difference?</p>
+<p>Next we want to redo our visualisations based on what we already plotted. Try to make the following plots but this time using summary data without domestic animals:</p>
+<ul>
+<li><p>stacked bar chart comparing species richness between habitat types, with the bait type included</p></li>
+<li><p>Bar chart with error bars looking at shannon index across the different habitats</p></li>
+<li><p>Histogram of species richness without domestic animals</p></li>
+<li><p>Histogram of shannon index without domestic animals</p></li>
+<li><p>Density plots comparing species richness across the different habitat types when domestic animals are no longer included.</p></li>
+<li><p>The joint boxplot / violin plot with non-domestic species richness by habitat type (see below).</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>You can investigate the outliers now present to see whether there is something that needs following up in the same way as before.</p>
+<p>Additional challenges:</p>
+<ul>
+<li><p>The number of domestic species might be an interesting variable to include. How could you extract that using your current dataset (hint, you have the species richness, SR, which includes domestic animals and your species richness no domestic, SR_ND, which excludes them)</p></li>
+<li><p>What conclusions might we draw from our data now? Is species richness and shannon index higher or lower in large forest patches vs small and open areas?</p></li>
+</ul>
+<p>Our other hypothesis was that distance to urban setting will influence the species richness of an area. Lets also plot that. I have included the basic code. When using scatterplots, we use col to change the colour according to a factor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(dist_to_city, SR_ND, <span class="at">col =</span> Habitat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li><p>What conclusions can we draw here?</p></li>
+<li><p>What about domestic animals only?</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(dist_to_city, SR<span class="sc">-</span> SR_ND, <span class="at">shape =</span> Habitat)) <span class="co">#nb you can also change the shape of the point according to a factor, and you can combine this with colour. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="considering-confounders-and-biases" class="level4">
+<h4 class="anchored" data-anchor-id="considering-confounders-and-biases">Considering confounders and biases</h4>
+<p>The final step would be to consider whether you have any possible confounders to contend with, or colinearity in your dataset.</p>
+<p>In this dataset, we also had information on whether a trap was baited or not, and also the features in which camera traps were placed. How could these be possible confounders?</p>
+<p>We will do some quick plots to see if we see any relationships here we might want to consider.</p>
+<p>EXERCISE 7</p>
+<p>Try to see if you can recreate the below plots</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-27-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-27-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-27-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li><p>what conclusions can we draw regarding the use of bait?</p></li>
+<li><p>what conclusions can we draw regarding features?</p></li>
+<li><p>Which plots are easier to draw conclusions from here?</p></li>
+<li><p>Can you plot the features bar chart as a side by side instead of stacked? Does this aid interpretation?</p></li>
+</ul>
+<p>What if we want to add error bars to one of our bar plots above? In this example, we want to see whether there is a difference between the forest types and the month the camera was retrieved in. To do this we will do the following steps:</p>
+<ul>
+<li><p>Pull out the month from the retrieval date</p></li>
+<li><p>Extract the summary statistics using Rmisc</p></li>
+<li><p>Plot the bar chart</p></li>
+<li><p>Add the error bars</p></li>
+</ul>
+<p>Follow the code below and inspect the outputs - this demonstrates the kinds of errors you may come across and the steps needed to get to the final output we want!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: "hide"</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span><span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">month</span>(<span class="fu">ymd</span>(retrieval_date)))<span class="ot">-&gt;</span>canid_SR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There were 115 warnings in `mutate()`.
+The first warning was:
+ℹ In argument: `Month = month(ymd(retrieval_date))`.
+ℹ In group 1: `SiteID = "AC1_d17434"`.
+Caused by warning:
+! All formats failed to parse. No formats found.
+ℹ Run `dplyr::last_dplyr_warnings()` to see the 114 remaining warnings.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>canid_summary<span class="ot">&lt;-</span><span class="fu">summarySE</span>(canid_SR, <span class="at">measurevar =</span> <span class="st">"SR_ND"</span>, <span class="at">groupvars =</span> <span class="fu">c</span>(<span class="st">"Habitat"</span>, <span class="st">"Month"</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> Month))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>)<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">width =</span> <span class="fl">0.5</span>) <span class="co">#This doesnt look right! We want the plot to be side by side rather than stacked and the error bars are all wrong. Plus the colour looks very strange!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This is because R thinks that month is a number, whereas it should be a factor.</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> <span class="fu">factor</span>(Month)))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>)<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">width =</span> <span class="fl">0.5</span>) <span class="co">#better. But the error bars are still wrong and its still stacked</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> <span class="fu">factor</span>(Month)))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>())<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">width =</span> <span class="fl">0.5</span>) <span class="co">#now its side by side, but the error bars are still wrong because htey have not been "dodged"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> <span class="fu">factor</span>(Month)))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>())<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">width =</span> <span class="fl">0.5</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="co">#almost there. But error bars still look wrong, because we enforced a particular width</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> <span class="fu">factor</span>(Month)))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>())<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="co">#better</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we can also do plots side by side instead of within one plot - this may be easier to interpret.</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>canid_summary1<span class="ot">&lt;-</span><span class="fu">summarySE</span>(canid_SR, <span class="at">measurevar =</span> <span class="st">"SR_ND"</span>, <span class="at">groupvars =</span> <span class="fu">c</span>(<span class="st">"Habitat"</span>, <span class="st">"Month"</span>, <span class="st">"bait_type"</span>))</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_summary1, <span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> <span class="fu">factor</span>(Month)))<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>())<span class="sc">+</span><span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> SR_ND <span class="sc">-</span> se, <span class="at">ymax =</span> SR_ND <span class="sc">+</span> se), <span class="at">position =</span> <span class="fu">position_dodge</span>())<span class="sc">+</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>bait_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-28-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Finally we should consider date and space but we will cover that in more depth in later tutorials. For now, lets see if there is any variation in SR by date and by the different habitats. Here I demonstrate the use of geom_tile() and geom_line()</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span><span class="fu">mutate</span>(<span class="at">retrieval_date =</span> <span class="fu">as.Date</span>(retrieval_date, <span class="at">format =</span> <span class="st">"%d/%m/%Y"</span>))<span class="ot">-&gt;</span>canid_SR</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_tile</span>(<span class="fu">aes</span>(retrieval_date, Habitat, <span class="at">fill =</span> SR_ND))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(retrieval_date, SR_ND, <span class="at">col =</span> Habitat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/unnamed-chunk-29-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li><p>Can you interpret these plots?</p></li>
+<li><p>Why does the line graph look the way it does? How could you improve it? (hint - do you have multiple entries per date?) Is retrieval date even the best measure for this or should we go back to our raw data and use a different grouping variable? For example summarise by the date?</p></li>
+<li><p>Are there any patterns showing here that may cause alarm for analysis? (think also about how you would have mitigated this if you were collecting data in this study)</p></li>
+<li><p>Rerun these plots for SH. Decide whether there are possible confounders or sources of bias in the dataset that might be concerning.</p></li>
+</ul>
+<p>This ends the data exploration part. Our data exploration suggests that once we have accounted for domestic animals in the dataset, we should be able to begin our statistical analysis without much cause for concern.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Exercise 1</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(canid_col) <span class="co"># will identify the columns where there are NA's - missing values</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(canid_col) <span class="co">#rows and columns</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(canid_col) <span class="co">#check column types</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(canid_col)</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Exercise 2</span></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(canid_col<span class="sc">$</span>species)) <span class="co">#number of species detected</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(canid_col<span class="sc">$</span>bait_type)<span class="co">#identify what hte bait options are</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(canid_col<span class="sc">$</span>deployment_id[canid_col<span class="sc">$</span>bait_type <span class="sc">==</span> <span class="st">"No Bait"</span>]))</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(canid_col<span class="sc">$</span>deployment_id))<span class="sc">-</span><span class="dv">66</span> <span class="co">#all the non "No Bait" ones must be Meat as thats the only option</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(canid_col) <span class="co">#gives the necessary information for summarising the dataset</span></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a><span class="co">#Exercise 3</span></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a><span class="co">#canid_SR%&gt;%rename(Habitat = plot_name)-&gt;canid_SR</span></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a><span class="co">#names(canid_SR)[1]&lt;-"SiteID"</span></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a><span class="co">#Exercise 4</span></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(canid_SR<span class="sc">$</span>SR)</span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(canid_SR<span class="sc">$</span>SR)</span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(canid_SR<span class="sc">$</span>SR)</span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a>canid_SR<span class="sc">%&gt;%</span><span class="fu">group_by</span>(Habitat)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">MeanSR =</span> <span class="fu">mean</span>(SR), <span class="at">SD_SR =</span> <span class="fu">sd</span>(SR), <span class="at">MeanSH =</span> <span class="fu">mean</span>(SH), <span class="at">SD_SH =</span> <span class="fu">sd</span>(SH))</span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a><span class="co">#Little difference between habitat types</span></span>
+<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a><span class="fu">summarySE</span>(canid_SR, <span class="at">measurevar =</span> <span class="st">"SR"</span>, <span class="at">groupvars =</span> <span class="fu">c</span>(<span class="st">"Habitat"</span>, <span class="st">"bait_type"</span>))</span>
+<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a><span class="co">#Exercise 5</span></span>
+<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR, <span class="fu">aes</span>(<span class="at">x =</span> SR, <span class="at">fill =</span> Habitat)) <span class="sc">+</span></span>
+<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>( <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb54-39"><a href="#cb54-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">""</span>,</span>
+<span id="cb54-40"><a href="#cb54-40" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Species richness"</span>,</span>
+<span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Density"</span>) <span class="sc">+</span></span>
+<span id="cb54-42"><a href="#cb54-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/Solutions-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#alpha adjusts the density of the colour</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="co">#EXERCISE 6</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SH</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>canid_col<span class="sc">%&gt;%</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(common_name, <span class="fu">regex</span>(<span class="st">"domestic"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)))<span class="sc">%&gt;%</span> </span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(deployment_id, common_name)<span class="sc">%&gt;%</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">sum</span>(group_size))<span class="sc">%&gt;%</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> common_name, <span class="at">values_from =</span> Count, <span class="at">values_fill =</span> <span class="dv">0</span>)<span class="sc">%&gt;%</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">SH_ND =</span> <span class="fu">diversity</span>(<span class="fu">c_across</span>(<span class="fu">where</span>(is.numeric)), <span class="at">index =</span> <span class="st">"shannon"</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(deployment_id, SH_ND)<span class="sc">%&gt;%</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">SiteID =</span> deployment_id)<span class="sc">%&gt;%</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">right_join</span>(canid_SR)<span class="sc">%&gt;%</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">SH_ND =</span> <span class="fu">replace_na</span>(SH_ND, <span class="dv">0</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>SH_ND, <span class="fu">everything</span>(), SH_ND)<span class="ot">-&gt;</span>canid_SR</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a><span class="co">#EXERCISE 7</span></span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(bait_type, SR_ND))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/Solutions-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(feature, SR_ND))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/Solutions-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> bait_type), <span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="co">#side by side bar chart</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/Solutions-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canid_SR)<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="fu">aes</span>(Habitat, SR_ND, <span class="at">fill =</span> feature), <span class="at">stat =</span> <span class="st">"identity"</span>) <span class="co">#stacked bar chart</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Tutorial-3_Loading,-manipulating-and-tidying-data_files/figure-html/Solutions-5.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
